@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Візуалізатор операцій з множинами</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=JetBrains+Mono:ital,wght@0,800;1,800&family=Noto+Sans+Mono:wght@100..900&family=Roboto+Mono:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,10 +16,10 @@
             <div id="setAContainer" class="input-container"></div>
         </div>
         <select name="select" id="operationSelect">
-            <option value="Об'єднання">[ ∪ ] Об'єднання</option>
-            <option value="Перетин">[ ∩ ] Перетин</option>
-            <option value="Різниця">[ ∖ ] Різниця</option>
-            <option value="Симетрична різниця">[ Δ ] Симетрична різниця</option>
+            <option class="options" value="Об'єднання">[ U ] Об'єднання</option>
+            <option class="options" value="Перетин">[ ∩ ] Перетин</option>
+            <option class="options" value="Різниця">[ ∖ ] Різниця</option>
+            <option class="options" value="Симетрична різниця">[ Δ ] Симетрична різниця</option>
         </select>
         <div class="input-wrapper">
             <div id="setBContainer" class="input-container"></div>
@@ -66,7 +69,7 @@
 
                 // Динамічно змінюємо ширину інпуту
                 newInput.addEventListener('input', function () {
-                    newInput.style.width = `${Math.max(newInput.value.length + 1, 2)}ch`; // Збільшуємо мінімальну ширину
+                    newInput.style.width = `${Math.max(newInput.value.length + 1, 2)}ch`;
                     updateResult();
                 });
 
@@ -119,24 +122,21 @@
                 });
 
                 newInput.addEventListener('focus', function () {
-                    newInput.style.width = `${Math.max(newInput.value.length + 1, 2)}ch`; // Збільшуємо мінімальну ширину
+                    newInput.style.width = `${Math.max(newInput.value.length + 1, 2)}ch`;
                 });
 
                 container.appendChild(newInput);
-                return newInput; // Повертаємо новий інпут
+                return newInput;
             }
             
             const setAContainer = document.getElementById('setAContainer');
             const setBContainer = document.getElementById('setBContainer');
 
-            // Initialize with one input field for each set
             addInput(setAContainer, 'A');
             addInput(setBContainer, 'B');
 
-            // Initial result update
             updateResult();
 
-            // Update result on operation change
             operationSelect.addEventListener('change', updateResult);
         });
     </script>
