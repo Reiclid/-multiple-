@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Візуалізатор операцій з множинами</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Операції з множинами</h1>
+    <div class="controls">
+        <div class="input-wrapper">
+            <div id="setAContainer" class="input-container"></div>
+        </div>
+        <select name="select" id="operationSelect">
+            <option value="Об'єднання">[ ∪ ] Об'єднання</option>
+            <option value="Перетин">[ ∩ ] Перетин</option>
+            <option value="Різниця">[ ∖ ] Різниця</option>
+            <option value="Симетрична різниця">[ Δ ] Симетрична різниця</option>
+        </select>
+        <div class="input-wrapper">
+            <div id="setBContainer" class="input-container"></div>
+        </div>
+        <div class="result">
+            <p class="resultP">Результат: </p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const operationSelect = document.getElementById('operationSelect');
+            const resultP = document.querySelector('.resultP');
+
+            function updateResult() {
+                const setA = new Set(Array.from(setAContainer.querySelectorAll('input')).map(input => input.value.trim()).filter(value => value));
+                const setB = new Set(Array.from(setBContainer.querySelectorAll('input')).map(input => input.value.trim()).filter(value => value));
+                let result = new Set();
+        
+                switch (operationSelect.value) {
+                    case 'Об\'єднання':
+                        result = new Set([...setA, ...setB]);
+                        break;
+                    case 'Перетин':
+                        result = new Set([...setA].filter(x => setB.has(x)));
+                        break;
+                    case 'Різниця':
+                        result = new Set([...setA].filter(x => !setB.has(x)));
+                        break;
+                    case 'Симетрична різниця':
+                        result = new Set([...setA].filter(x => !setB.has(x)).concat([...setB].filter(x => !setA.has(x))));
+                        break;
+                    case 'Доповнення':
+                        result = new Set([...setB].filter(x => !setA.has(x)));
+                        break;
+                    default:
+                        result = new Set([...setA, ...setB]);
+                        return;
+                }
+                
+                resultP.textContent = 'Результат: ' + Array.from(result).join(', ');
+            }
+
+            function addInput(container, setName) {
+                const newInput = document.createElement('input');
+                newInput.type = 'text';
+                newInput.style.width = `${Math.max(newInput.value.length + 1, 2)}ch`;
+
+                // Динамічно змінюємо ширину інпуту
+                newInput.addEventListener('input', function () {
+                    newInput.style.width = `${Math.max(newInput.value.length + 1, 2)}ch`; // Збільшуємо мінімальну ширину
+                    updateResult();
+                });
+
+                // Обробка події blur для видалення порожніх інпутів
+                newInput.addEventListener('blur', function () {
+                    // Перевіряємо, чи є в контейнері більше одного інпуту
+                    const allInputs = container.querySelectorAll('input');
+                    if (!newInput.value && allInputs.length > 1) {
+                        // Видаляємо кому перед інпутом, якщо вона існує
+                        if (newInput.previousElementSibling && newInput.previousElementSibling.classList.contains('comma')) {
+                            container.removeChild(newInput.previousElementSibling);
+                        }
+                        // Видаляємо порожній інпут, якщо він втрачає фокус
+                        container.removeChild(newInput);
+                        
+                    }
+                });
+
+                // Обробка натискання клавіш
+                newInput.addEventListener('keydown', function (event) {
+                    if (event.key === ' ' && !newInput.value) {
+                        // Забороняємо пробіл у порожньому інпуті
+                        event.preventDefault();
+                    } else if (event.key === ' ' && newInput.value) {
+                        // Перехід на наступний інпут, якщо пробіл натиснуто в непорожньому інпуті
+                        event.preventDefault();
+                        if (newInput.nextElementSibling && newInput.nextElementSibling.tagName === 'INPUT') {
+                            newInput.nextElementSibling.focus();
+                        } else {
+                            const comma = document.createElement('span');
+                            comma.textContent = ',';
+                            comma.classList.add('comma');
+                            container.appendChild(comma);
+                            const nextInput = addInput(container, setName);
+                            nextInput.focus();
+                        }
+                    } else if (event.key === 'Backspace' && !newInput.value) {
+                        // Повернення фокусу на попередній інпут, якщо Backspace натиснуто в порожньому інпуті
+                        event.preventDefault();
+                        if (newInput.previousElementSibling && newInput.previousElementSibling.classList.contains('comma')) {
+                            // Видаляємо кому і фокусуємо попередній інпут
+                            container.removeChild(newInput.previousElementSibling); 
+                        }
+                        if (newInput.previousElementSibling && newInput.previousElementSibling.tagName === 'INPUT') {
+                            newInput.previousElementSibling.focus(); // Фокусуємо попередній інпут
+                            container.removeChild(newInput); // Видаляємо поточний порожній інпут
+                            
+                        }
+                    }
+                });
+
+                newInput.addEventListener('focus', function () {
+                    newInput.style.width = `${Math.max(newInput.value.length + 1, 2)}ch`; // Збільшуємо мінімальну ширину
+                });
+
+                container.appendChild(newInput);
+                return newInput; // Повертаємо новий інпут
+            }
+            
+            const setAContainer = document.getElementById('setAContainer');
+            const setBContainer = document.getElementById('setBContainer');
+
+            // Initialize with one input field for each set
+            addInput(setAContainer, 'A');
+            addInput(setBContainer, 'B');
+
+            // Initial result update
+            updateResult();
+
+            // Update result on operation change
+            operationSelect.addEventListener('change', updateResult);
+        });
+    </script>
+</body>
+</html>
